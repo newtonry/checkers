@@ -13,16 +13,16 @@ class Pawn
   end
 
   def possible_moves board
-    poss_moves = one_space_moves
+    poss_moves = slide_moves
     poss_moves.select! { |move| on_board?(move) && wont_collide?(move, board)}
 
-    poss_moves = poss_moves + get_jumps(board)
+    poss_moves = poss_moves + jump_moves(board)
   end
 
-  def get_jumps board
+  def jump_moves board
     jumps = []
 
-    one_space_moves.each do |move|
+    slide_moves.each do |move|
 
       if blocking_piece = board[move] and blocking_piece.color != @color
         #then move one in that vector
@@ -37,7 +37,7 @@ class Pawn
     jumps
   end
 
-  def one_space_moves
+  def slide_moves
     moves = []
     moves << [@position[0] + @direction, @position[1] + 1]
     moves << [@position[0] + @direction, @position[1] - 1]

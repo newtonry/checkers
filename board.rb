@@ -46,13 +46,12 @@ class Board
     if piece.possible_moves(self).include?(end_pos)
 
       #for jumping moves
+      #also, we are going with the rule set that if you jump over one piece
+      #you must take all possible jump moves after that, since there are no
+      #clear rules for checkers/draughts
+
       unless within_one_spot(piece, end_pos)
-        dir = get_dir(start_pos, end_pos)
-        until piece.position == end_pos
-          self[piece.position] = nil
-          step = [piece.position[0] + dir[0], piece.position[1] + dir[1]]
-          self[step] = piece
-        end
+        make_diagional_move(piece, start_pos, end_pos)
 
       end
 
@@ -61,6 +60,15 @@ class Board
       return true
     else
       return false
+    end
+  end
+
+  def make_diagonal_move piece, start_pos, end_pos
+    dir = get_dir(start_pos, end_pos)
+    until piece.position == end_pos
+      self[piece.position] = nil
+      step = [piece.position[0] + dir[0], piece.position[1] + dir[1]]
+      self[step] = piece
     end
   end
 

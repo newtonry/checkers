@@ -7,10 +7,12 @@ end
 class Board
   attr_reader :board
 
-  def initialize
-    fill_up_board
-
-
+  def initialize board = nil
+    if board.nil?
+      fill_up_board
+    else
+      @board = board
+    end
   end
 
   def fill_up_board
@@ -40,27 +42,65 @@ class Board
     return false unless piece = self[start_pos]
     return false if piece.color != color
 
-    p piece.possible_moves(self).map { |move| pos_to_readable(move) }
-    p piece.possible_moves(self)
-
     if piece.possible_moves(self).include?(end_pos)
 
       #for jumping moves
-      #also, we are going with the rule set that if you jump over one piece
-      #you must take all possible jump moves after that, since there are no
-      #clear rules for checkers/draughts
-
-      unless within_one_spot(piece, end_pos)
-        make_diagional_move(piece, start_pos, end_pos)
-
+      if !within_one_spot(piece, end_pos)
+        make_diagonal_move(piece, start_pos, end_pos)
+      else
+        self[end_pos] = piece
+        self[start_pos] = nil
+        return true
       end
-
-      self[end_pos] = piece
-      self[start_pos] = nil
-      return true
     else
-      return false
+      false
     end
+  end
+
+  def make_move_chain moves
+    test_board = self.deep_dup
+
+    start_pos = moves[0]
+
+    moves[1..-1].each do |move|
+      #make each move and switch the satart pos
+      if !test_board[start_pos].jump_moves(test_board).include?(move)
+        return false
+      end
+      test_board.make_move(start_pos, move, test_board[start_pos].color)
+      start_pos = move
+    end
+
+
+    start_pos = moves[0]
+
+    moves[1..-1].each do |move|
+      make_move(start_pos, move, self[start_pos].color)
+      start_pos = move
+    end
+
+    true
+
+  end
+
+  #duplicates board so that we can test moves
+  def deep_dup
+    duped_board = []
+    @board.each_with_index do |row, row_ind|
+      duped_board << []
+
+      row.each_with_index do |piece, column_ind|
+        if piece.nil?
+          duped_board[row_ind][column_ind] = nil
+          next
+        end
+
+        new_piece = piece.dup
+        duped_board[row_ind][column_ind] = new_piece
+        new_piece.position = new_piece.position.dup
+      end
+    end
+    self.class.new(duped_board)
   end
 
   def make_diagonal_move piece, start_pos, end_pos
@@ -70,6 +110,7 @@ class Board
       step = [piece.position[0] + dir[0], piece.position[1] + dir[1]]
       self[step] = piece
     end
+    true
   end
 
   def get_dir start_pos, end_pos

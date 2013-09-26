@@ -30,7 +30,6 @@ class Pawn
 
         if board[poss_move].nil? #will need to account for values of board
           jumps << poss_move
-          p "Jump move availiable at #{move}"
         end
       end
     end

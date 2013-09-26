@@ -20,15 +20,28 @@ class Checkers
       puts @board
       puts "\n#{turn[0].to_s.capitalize}'s turn!"
 
-      until @board.make_move(*prompt_user_move, turn[0])
-      end
 
+      move_was_made = false
+
+      until move_was_made == true
+#        @board.make_move(*prompt_user_move, turn[0])
+        user_input = prompt_user_move
+
+        if user_input.length == 2
+          move_was_made = @board.make_move(*user_input, turn[0])
+        elsif user_input.length > 2
+          move_was_made = @board.make_move_chain(user_input)
+        end
+
+        puts "Invalid move!" unless move_was_made
+
+      end
       turn.reverse!
 
-      puts @board
+    end
 
 #      break
-    end
+    # end
 
   end
 
@@ -40,9 +53,15 @@ class Checkers
   def sanitize_input input
     input = input.strip.downcase
     return nil if input.empty?
-    start_pos, end_pos = *input.split
 
-    [convert_input_format(start_pos), convert_input_format(end_pos)]
+    input = input.split
+
+    input.map {|move| convert_input_format(move)}
+
+
+    # start_pos, end_pos = *input.split
+    #
+    # [convert_input_format(start_pos), convert_input_format(end_pos)]
   end
 
   def convert_input_format pos

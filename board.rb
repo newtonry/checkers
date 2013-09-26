@@ -62,8 +62,6 @@ class Board
     else
       return false
     end
-
-
   end
 
   def get_dir start_pos, end_pos
@@ -89,19 +87,29 @@ class Board
 
   def to_s
     unicode_chars = {
-      :white => "\u262e".colorize(:color => :white),
-      :black => "\u2622".colorize(:color => :yellow)
+      :white => "\u262e",
+      :black => "\u2622"
+    }
+
+    piece_colors = {
+      :white => :white,
+      :black => :yellow
     }
 
     board_output = ""
     @board.reverse.each_with_index do |row, ind|
+      board_colors = [:light_blue, :blue]
+      board_colors.reverse! if ind.odd?
       row_string =  "#{8 - ind} "
       row.each do |column|
+
         if column.nil?
-          row_string << ". "
-        else
-          row_string << "#{unicode_chars[column.color]} "
+          row_string << "  ".colorize(:background => board_colors[0])
+        elsif column.is_a?(Pawn)
+          row_string << "#{unicode_chars[column.color]} ".colorize(:color => piece_colors[column.color] , :background => board_colors[0])
         end
+        board_colors.reverse!
+
       end
       board_output << row_string << "\n"
     end

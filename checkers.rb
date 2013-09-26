@@ -1,5 +1,6 @@
 require "./board.rb"
 require "./pieces.rb"
+require "colorize"
 
 
 class Checkers
@@ -11,25 +12,33 @@ class Checkers
 
 
   def play
+
+    turn = [:white, :black]
+
     loop do
 
-      @board
-      prompt_user_move
+      puts @board
+      puts "\n#{turn[0].to_s.capitalize}'s turn!"
 
+      until @board.make_move(*prompt_user_move, turn[0])
+      end
 
+      turn.reverse!
 
-      break
+      puts @board
+
+#      break
     end
 
   end
 
   def prompt_user_move
-    puts "Please enter your move a1 b2"
+    puts "Please enter your move eg a3 b4:"
     sanitize_input(gets.chomp)
   end
 
   def sanitize_input input
-    input = input.strip.upcase
+    input = input.strip.downcase
     return nil if input.empty?
     start_pos, end_pos = *input.split
 
@@ -44,13 +53,15 @@ class Checkers
 end
 
 game = Checkers.new
-#game.play
+game.play
 
-p game.board
-pos = game.convert_input_format('a3')
+#p game.board
+
+
+#pos = game.convert_input_format('a3')
 #
 # p pos
 #
 
 
-p game.board.board[pos[0]][pos[1]].possible_moves(game.board)
+#p game.board.board[pos[0]][pos[1]].possible_moves(game.board)

@@ -1,3 +1,9 @@
+def pos_to_readable pos
+  (pos[1] + "a".ord).chr << (pos[0] + 1).to_s
+end
+
+
+
 class Board
   attr_reader :board
 
@@ -30,25 +36,63 @@ class Board
     end
   end
 
-  def make_move piece, end_pos
+  def make_move start_pos, end_pos, color
+    return false unless piece = self[start_pos]
+    return false if piece.color != color
+
+    p piece.possible_moves(self).map { |move| pos_to_readable(move) }
+    p piece.possible_moves(self)
+
+    if piece.possible_moves(self).include?(end_pos)
+
+      #for jumping moves
+      unless within_one_spot(piece, end_pos)
+        dir = get_dir(start_pos, end_pos)
+        until piece.position == end_pos
+          self[piece.position] = nil
+          step = [piece.position[0] + dir[0], piece.position[1] + dir[1]]
+          self[step] = piece
+        end
+
+      end
+
+      self[end_pos] = piece
+      self[start_pos] = nil
+      return true
+    else
+      return false
+    end
 
 
   end
 
-
-  def [] row, col
-    @board[row][col]
+  def get_dir start_pos, end_pos
+    [end_pos[0] <=> start_pos[0], end_pos[1] <=> start_pos[1]]
   end
 
-  def []= row, col, piece
-    @board[row][col] = piece
-    piece.position = [row, col]
+  def within_one_spot piece, end_pos
+    if (piece.position[0] - end_pos[0]).abs > 1 or (piece.position[0] - end_pos[0]).abs > 1
+      return false
+    end
+    true
   end
 
 
+  def [] pos
+    @board[pos[0]][pos[1]]
+  end
 
+  def []= pos, piece
+    @board[pos[0]][pos[1]] = piece
+    piece.position = pos unless piece.nil?
+  end
 
   def to_s
+    unicode_chars = {
+      :white => "\u262e".colorize(:color => :white),
+      :black => "\u2622".colorize(:color => :yellow)
+    }
+
     board_output = ""
     @board.reverse.each_with_index do |row, ind|
       row_string =  "#{8 - ind} "
@@ -56,7 +100,7 @@ class Board
         if column.nil?
           row_string << ". "
         else
-          row_string << "#{column.color.to_s[0].upcase} "
+          row_string << "#{unicode_chars[column.color]} "
         end
       end
       board_output << row_string << "\n"

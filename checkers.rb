@@ -46,7 +46,7 @@ class Checkers
   end
 
   def prompt_user_move
-    puts "Please enter your move eg a3 b4:"
+    puts "Please enter your move eg a3 b4 (add additional move if double jumping):"
     sanitize_input(gets.chomp)
   end
 

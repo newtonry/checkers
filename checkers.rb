@@ -47,7 +47,7 @@ game = Checkers.new
 #game.play
 
 p game.board
-pos = game.convert_input_format('c3')
+pos = game.convert_input_format('a3')
 #
 # p pos
 #

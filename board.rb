@@ -1,3 +1,6 @@
+require "./pieces.rb"
+require "colorize"
+
 def pos_to_readable pos
   (pos[1] + "a".ord).chr << (pos[0] + 1).to_s
 end
@@ -50,6 +53,8 @@ class Board
       else
         self[end_pos] = piece
         self[start_pos] = nil
+        puts self[end_pos].class
+        upgrade_if_needed(self[end_pos]) #issue here
         return true
       end
     else
@@ -71,37 +76,31 @@ class Board
       start_pos = move
     end
 
-
     start_pos = moves[0]
-
     moves[1..-1].each do |move|
       make_move(start_pos, move, self[start_pos].color)
       start_pos = move
     end
 
     true
-
   end
 
-  #duplicates board so that we can test moves
-  def deep_dup
-    duped_board = []
-    @board.each_with_index do |row, row_ind|
-      duped_board << []
 
-      row.each_with_index do |piece, column_ind|
-        if piece.nil?
-          duped_board[row_ind][column_ind] = nil
-          next
-        end
-
-        new_piece = piece.dup
-        duped_board[row_ind][column_ind] = new_piece
-        new_piece.position = new_piece.position.dup
-      end
-    end
-    self.class.new(duped_board)
+  def upgrade_if_needed piece
+    upgrade_to_king(piece) if should_upgrade?(piece)
   end
+
+
+  def should_upgrade? piece
+    upgrade_row = piece.color == :white ? 7 : 0
+    return true if piece.position[0] == upgrade_row and piece.is_a?(Pawn)
+    false
+  end
+
+  def upgrade_to_king piece
+    self[piece.position] = King.new(piece.position, piece.color)
+  end
+
 
   def make_diagonal_move piece, start_pos, end_pos
     dir = get_dir(start_pos, end_pos)
@@ -109,6 +108,7 @@ class Board
       self[piece.position] = nil
       step = [piece.position[0] + dir[0], piece.position[1] + dir[1]]
       self[step] = piece
+      upgrade_if_needed(piece)
     end
     true
   end
@@ -134,6 +134,28 @@ class Board
     piece.position = pos unless piece.nil?
   end
 
+  #duplicates board so that we can test moves
+  def deep_dup
+    duped_board = []
+    @board.each_with_index do |row, row_ind|
+      duped_board << []
+
+      row.each_with_index do |piece, column_ind|
+        if piece.nil?
+          duped_board[row_ind][column_ind] = nil
+          next
+        end
+
+        new_piece = piece.dup
+        duped_board[row_ind][column_ind] = new_piece
+        new_piece.position = new_piece.position.dup
+      end
+    end
+    self.class.new(duped_board)
+  end
+
+
+
   def to_s
     unicode_chars = {
       :white => "\u262e",
@@ -142,7 +164,7 @@ class Board
 
     piece_colors = {
       :white => :white,
-      :black => :yellow
+      :black => :red
     }
 
     board_output = ""
@@ -154,7 +176,9 @@ class Board
 
         if column.nil?
           row_string << "  ".colorize(:background => board_colors[0])
-        elsif column.is_a?(Pawn)
+        elsif column.is_a?(King)
+          row_string << "\u2654 ".colorize(:color => piece_colors[column.color] , :background => board_colors[0])
+        else #should be a pawn otherwise
           row_string << "#{unicode_chars[column.color]} ".colorize(:color => piece_colors[column.color] , :background => board_colors[0])
         end
         board_colors.reverse!
@@ -179,6 +203,13 @@ end
 #
 # pawn = Pawn.new([2,2] ,:white)
 #
+# k = King.new([4,4], :white)
+# b[[4,4]] = k
+#
+# p k.slide_moves
+# p b
+
+
 # #p pawn.on_board?([-1,4])
 # p b
 # b[6,0] = pawn

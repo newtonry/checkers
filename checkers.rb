@@ -46,7 +46,7 @@ class Checkers
   end
 
   def prompt_user_move
-    puts "Please enter your move eg a3 b4 (add additional move if double jumping):"
+    puts "Please enter your move eg a3 b4 (add additional moves if double jumping):"
     sanitize_input(gets.chomp)
   end
 
@@ -57,11 +57,6 @@ class Checkers
     input = input.split
 
     input.map {|move| convert_input_format(move)}
-
-
-    # start_pos, end_pos = *input.split
-    #
-    # [convert_input_format(start_pos), convert_input_format(end_pos)]
   end
 
   def convert_input_format pos

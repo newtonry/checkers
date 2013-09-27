@@ -29,7 +29,7 @@ class Pawn
         poss_move = [move[0] + @direction, (move[1] <=> @position[1]) + move[1]]
 
         if board[poss_move].nil? #will need to account for values of board
-          jumps << poss_move
+          jumps << poss_move #if on_board?(move)
         end
       end
     end
@@ -58,8 +58,52 @@ end
 
 
 class King < Pawn
-  def possible_moves
+  DIRS = [[-1, -1], [1, 1], [-1, 1], [1, -1]]
+
+  def possible_moves board
+    (slide_moves + jump_moves).select do |move|
+      on_board?(move) && wont_collide?(move, board)
+    end
+
+
   end
+
+
+  def slide_moves
+    moves = DIRS.map do |dir|
+      [@position[0] + dir[0], @position[1] + dir[1]]
+    end
+  end
+
+
+  # def possible_moves
+  #   def possible_moves board
+  #     poss_moves = slide_moves
+  #     poss_moves.select! { |move| on_board?(move) && wont_collide?(move, board)}
+  #
+  #     poss_moves = poss_moves + jump_moves(board)
+  #   end
+  #
+  #   def jump_moves board
+  #     jumps = []
+  #
+  #     slide_moves.each do |move|
+  #
+  #       if blocking_piece = board[move] and blocking_piece.color != @color
+  #         #then move one in that vector
+  #         poss_move = [move[0] + @direction, (move[1] <=> @position[1]) + move[1]]
+  #
+  #         if board[poss_move].nil? #will need to account for values of board
+  #           jumps << poss_move
+  #         end
+  #       end
+  #     end
+  #     jumps
+  #   end
+  # end
+  #
+
+
 
 
 end

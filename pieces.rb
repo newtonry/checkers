@@ -1,8 +1,3 @@
-def pos_to_readable pos
-  (pos[1] + "a".ord).chr << (pos[0] + 1).to_s
-end
-
-
 class Pawn
   attr_accessor :position, :color
 
@@ -21,12 +16,12 @@ class Pawn
 
   def jump_moves board
     jumps = []
-
-    slide_moves.each do |move|
+ 
+    slide_moves.select {|move| on_board?(move)}.each do |move|
 
       if blocking_piece = board[move] and blocking_piece.color != @color
         #then move one in that vector
-        poss_move = [move[0] + @direction, (move[1] <=> @position[1]) + move[1]]
+        poss_move = [move[0] + (move[0] <=> @position[0]), (move[1] <=> @position[1]) + move[1]]
 
         if board[poss_move].nil? #will need to account for values of board
           jumps << poss_move #if on_board?(move)
@@ -35,7 +30,6 @@ class Pawn
     end
     jumps
   end
-
   def slide_moves
     moves = []
     moves << [@position[0] + @direction, @position[1] + 1]
@@ -47,63 +41,25 @@ class Pawn
     true
   end
 
-
   def on_board? move
     between_0_7 = (0..7)
     return false unless between_0_7.include?(move[0]) && between_0_7.include?(move[1])
     true
   end
-
 end
-
 
 class King < Pawn
   DIRS = [[-1, -1], [1, 1], [-1, 1], [1, -1]]
 
   def possible_moves board
-    (slide_moves + jump_moves).select do |move|
+    (slide_moves + jump_moves(board)).select do |move|
       on_board?(move) && wont_collide?(move, board)
     end
-
-
   end
-
 
   def slide_moves
     moves = DIRS.map do |dir|
       [@position[0] + dir[0], @position[1] + dir[1]]
     end
   end
-
-
-  # def possible_moves
-  #   def possible_moves board
-  #     poss_moves = slide_moves
-  #     poss_moves.select! { |move| on_board?(move) && wont_collide?(move, board)}
-  #
-  #     poss_moves = poss_moves + jump_moves(board)
-  #   end
-  #
-  #   def jump_moves board
-  #     jumps = []
-  #
-  #     slide_moves.each do |move|
-  #
-  #       if blocking_piece = board[move] and blocking_piece.color != @color
-  #         #then move one in that vector
-  #         poss_move = [move[0] + @direction, (move[1] <=> @position[1]) + move[1]]
-  #
-  #         if board[poss_move].nil? #will need to account for values of board
-  #           jumps << poss_move
-  #         end
-  #       end
-  #     end
-  #     jumps
-  #   end
-  # end
-  #
-
-
-
-
 end

@@ -1,12 +1,3 @@
-require "./pieces.rb"
-require "colorize"
-
-def pos_to_readable pos
-  (pos[1] + "a".ord).chr << (pos[0] + 1).to_s
-end
-
-
-
 class Board
   attr_reader :board
 
@@ -42,7 +33,7 @@ class Board
   end
 
   def make_move start_pos, end_pos, color
-    return false unless piece = self[start_pos]
+    return false unless piece = self[start_pos]    
     return false if piece.color != color
 
     if piece.possible_moves(self).include?(end_pos)
@@ -53,7 +44,6 @@ class Board
       else
         self[end_pos] = piece
         self[start_pos] = nil
-        puts self[end_pos].class
         upgrade_if_needed(self[end_pos]) #issue here
         return true
       end
@@ -68,7 +58,6 @@ class Board
     start_pos = moves[0]
 
     moves[1..-1].each do |move|
-      #make each move and switch the satart pos
       if !test_board[start_pos].jump_moves(test_board).include?(move)
         return false
       end
@@ -85,11 +74,9 @@ class Board
     true
   end
 
-
   def upgrade_if_needed piece
     upgrade_to_king(piece) if should_upgrade?(piece)
   end
-
 
   def should_upgrade? piece
     upgrade_row = piece.color == :white ? 7 : 0
@@ -100,7 +87,6 @@ class Board
   def upgrade_to_king piece
     self[piece.position] = King.new(piece.position, piece.color)
   end
-
 
   def make_diagonal_move piece, start_pos, end_pos
     dir = get_dir(start_pos, end_pos)
@@ -124,6 +110,19 @@ class Board
     true
   end
 
+  def game_over?
+    pieces = {:white => 0, :black => 0}
+    
+    @board.each do |row|
+      row.each do |piece|
+        next if piece.nil?
+        pieces[piece.color] += 1
+      end
+    end
+    
+    return true if pieces[:white] == 0 or pieces[:black] == 0
+    false
+  end
 
   def [] pos
     @board[pos[0]][pos[1]]
@@ -153,8 +152,6 @@ class Board
     end
     self.class.new(duped_board)
   end
-
-
 
   def to_s
     unicode_chars = {
@@ -194,26 +191,5 @@ class Board
     end
 
     board_output << number_key
-
   end
 end
-
-
-# b = Board.new
-#
-# pawn = Pawn.new([2,2] ,:white)
-#
-# k = King.new([4,4], :white)
-# b[[4,4]] = k
-#
-# p k.slide_moves
-# p b
-
-
-# #p pawn.on_board?([-1,4])
-# p b
-# b[6,0] = pawn
-#
-# #p b[6,0] == pawn
-#
-# #p pawn.possible_moves
